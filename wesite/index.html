@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Are You Still Angry?</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Open+Sans&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: 'Open Sans', sans-serif;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-color: #000;
+      transition: background-image 1s ease-in-out;
+    }
+
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 20px;
+      z-index: 1;
+      position: relative;
+    }
+
+    h1 {
+      font-family: 'Pacifico', cursive;
+      font-size: 2rem;
+      color: #fff;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 5px #000;
+    }
+
+    #question {
+      font-size: 1.3rem;
+      color: #fff;
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 3px #000;
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      background-color: #f06292;
+      color: white;
+      cursor: pointer;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    }
+
+    #message {
+      font-size: 1.1rem;
+      margin: 15px;
+      color: #fff;
+      text-shadow: 1px 1px 3px #000;
+      min-height: 30px;
+    }
+
+    .typed-text {
+      display: inline-block;
+      border-right: 2px solid #fff;
+      animation: blink 0.7s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { border-color: transparent; }
+      50% { border-color: #fff; }
+    }
+
+    #celebration {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .photo {
+      width: 100px;
+      height: 100px;
+      border-radius: 15px;
+      object-fit: cover;
+      margin: 10px;
+    }
+
+    #message-box {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      margin: 30px 10px;
+      width: 90%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    #user-message {
+      color: white;
+      margin-top: 20px;
+    }
+
+    .hearts {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .heart {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Heart_corazón.svg/1024px-Heart_corazón.svg.png') no-repeat center center;
+      background-size: contain;
+      animation: float 10s infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 1.5rem; }
+      #question { font-size: 1rem; }
+      button { padding: 8px 15px; font-size: 0.9rem; }
+      .photo { width: 80px; height: 80px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hearts" id="hearts-container"></div>
+  <div id="emoji-shower" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:2;"></div>
+
+  <audio id="bgm" autoplay loop>
+    <source src="1.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="main-content">
+    <h1>Hey Love 💖</h1>
+    <div id="question">¿Sigues enojado conmigo?</div>
+    <div id="buttons">
+      <button onclick="respond('yes')">Yes, I am 😠</button>
+      <button onclick="respond('maybe')">Kya Pata… 😐</button>
+      <button onclick="respond('no')">No, I'm not 💖</button>
+    </div>
+    <div id="message"><span class="typed-text"></span></div>
+  </div>
+
+  <div id="celebration">
+    <h1>Yay! You forgave me! 🥳💘</h1>
+    <div id="gallery">
+      <img class="photo" src="images/20.jpeg" alt="her" />
+      <img class="photo" src="images/21.jpeg" alt="her" />
+      <img class="photo" src="images/22.jpeg" alt="her" />
+    </div>
+    <audio id="celebrationMusic">
+      <source src="/2.mp3" type="audio/mpeg">
+    </audio>
+    <div id="message-box">
+      <h1>Wanna say something to me? 💬</h1>
+      <textarea placeholder="Write here and I'll treasure it forever..."></textarea>
+      <button onclick="showUserMessage()">Send</button>
+      <div id="user-message"></div>
+    </div>
+  </div>
+
+  <video id="bgVideo" loop muted playsinline style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; object-fit:cover; z-index:-2;">
+    <source src="/3.mp4" type="video/mp4">
+  </video>
+
+  <script>
+     const responses = [
+    "Even the stars look dull when I’m not seeing them with you. ✨",
+    "Every moment without you feels like a page missing from my story. 📖",
+    "You’re not just part of my life—you’re the part that gives it meaning. 💗",
+    "I’d rather fight with you than laugh with anyone else. 💥➡️💕",
+    "You’re the ‘home’ my heart always searches for. 🏠❤️",
+    "If I could write you a love song every time I missed you, the world would be music by now. 🎶",
+    "Loving you feels like poetry whispered in the wind. 🍃",
+    "I don't want a perfect relationship—I want one that's real, with you. 🤝",
+    "You're the only person who makes my soul smile. 😊✨",
+    "I could spend forever trying to make you smile—and I’d call that a good life. 💞",
+    "Your laughter is my favorite melody. 🎵💫",
+    "They say home is where the heart is… mine’s wherever you are. 🧭❤️",
+    "You make ordinary moments magical just by being in them. 🌟",
+    "I didn’t just fall for you—I dove, heart-first. 💘",
+    "Even in silence, your presence speaks peace to my heart. 🤍",
+    "You’re my today and all of my tomorrows. ⏳💕",
+    "I’ve never been more sure of anything than I am of you. 🙏",
+    "No poem, no song, no quote could ever match the way I feel about you. 🖋️❤️",
+    "Let’s build a story so beautiful, even the stars envy us. 🌌",
+    "If my love were a flower, I’d grow you a garden of forever. 🌷🌸🌹"
+  ];
+
+    const bgItems = ['images/4.jpeg', 'images/2.jpeg','images/16.jpeg','images/17.jpeg','images/5.jpeg', 'images/7.jpeg', 'images/8.jpeg','images/11.jpeg','images/15.jpeg'];
+    let index = 0;
+    let bgIndex = 0;
+    let messageTimeout;
+
+  function showEmojiShower(type) {
+    const container = document.getElementById('emoji-shower');
+    const emojis = type === 'hearts' ? ['💖', '💗', '💓', '💞', '💕', '❤️'] : ['😢', '🥺', '😔', '😭'];
+    const count = 40;
+
+    for (let i = 0; i < count; i++) {
+      const emoji = document.createElement('div');
+      emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      emoji.style.position = 'absolute';
+      emoji.style.left = Math.random() * 100 + 'vw';
+      emoji.style.top = '-2rem';
+      emoji.style.fontSize = Math.random() * 20 + 30 + 'px';
+      emoji.style.opacity = Math.random() * 0.5 + 0.5;
+      emoji.style.animation = `floatDown ${Math.random() * 3 + 4}s ease-in`;
+      emoji.style.transform = `rotate(${Math.random() * 360}deg)`;
+      emoji.style.pointerEvents = 'none';
+      emoji.style.userSelect = 'none';
+      emoji.style.zIndex = 999;
+      container.appendChild(emoji);
+      setTimeout(() => emoji.remove(), 5000);
+    }
+  }
+
+  const style = document.createElement('style');
+  style.innerHTML = `
+  @keyframes floatDown {
+    0% {
+      transform: translateY(0) scale(1) rotate(0deg);
+      opacity: 0;
+    }
+    30% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100vh) scale(1.2) rotate(360deg);
+      opacity: 0;
+    }
+  }`;
+  document.head.appendChild(style);
+
+    function respond(answer) {
+      clearTimeout(messageTimeout);
+      changeBackground();
+      if (answer === 'no') {
+        showEmojiShower('hearts');
+        document.querySelector('.main-content').style.display = 'none';
+        document.getElementById('celebration').style.display = 'flex';
+        document.getElementById('celebrationMusic').play();
+        document.getElementById('message-box').style.display = 'flex';
+      } else {
+        showEmojiShower('emotional');
+        const msg = responses[index % responses.length];
+        typeText(msg);
+        index++;
+        messageTimeout = setTimeout(() => {
+          document.querySelector('.typed-text').textContent = '';
+          document.getElementById('question').textContent = 'Are you still angry with me?';
+        }, 5000);
+      }
+    }
+
+    function typeText(text) {
+      const el = document.querySelector('.typed-text');
+      el.textContent = '';
+      let i = 0;
+      const typer = setInterval(() => {
+        el.textContent += text.charAt(i);
+        i++;
+        if (i === text.length) clearInterval(typer);
+      }, 50);
+    }
+
+    
+  function showUserMessage() {
+    const message = document.querySelector('#message-box textarea').value.trim();
+    const output = document.getElementById('user-message');
+
+    if (message) {
+      const formURL = "https://docs.google.com/forms/d/e/1FAIpQLScAaWJuN2tvuOFlrP5ALleR85LJjRz5Mem3oCTmKo36nMn63g/formResponse";
+      const entryID = "entry.1605469518";
+
+      const formData = new FormData();
+      formData.append(entryID, message);
+
+      fetch(formURL, {
+        method: "POST",
+        mode: "no-cors",
+        body: formData
+      });
+
+      output.innerHTML = `<strong>You said:</strong> ${message}<br><span style="color:lightgreen;">💌 Sent straight to my heart (and inbox)!</span>`;
+    }
+  }
+
+
+    function changeBackground() {
+  const bg = bgItems[bgIndex % bgItems.length];
+  const video = document.getElementById('bgVideo');
+
+  if (bg === 'video') {
+    document.body.style.backgroundImage = 'none';
+    video.style.display = 'block';
+    video.play();
+  } else {
+    video.pause();
+    video.style.display = 'none';
+    document.body.style.backgroundImage = `url('${bg}')`;
+  }
+
+  bgIndex++;
+}
+
+    function createHearts() {
+      const container = document.getElementById('hearts-container');
+      setInterval(() => {
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.style.left = Math.random() * 100 + 'vw';
+        heart.style.animationDuration = (5 + Math.random() * 5) + 's';
+        container.appendChild(heart);
+        setTimeout(() => heart.remove(), 10000);
+      }, 300);
+    }
+
+    createHearts();
+    changeBackground(); // Set initial background
+
+    // Fix background music autoplay on mobile
+    document.addEventListener('click', () => {
+      const bgm = document.getElementById('bgm');
+      if (bgm && bgm.paused) {
+        bgm.play().catch(() => {});
+      }
+    }, { once: true });
+  </script>
+</body>
+</html>
